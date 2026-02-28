@@ -16,13 +16,14 @@
 #define GATE_OPEN_ANGLE 95
 #define GATE_CLOSE_ANGLE 0
 #define GATE_OPEN_TIME 3000   // milliseconds
+#define OLED_MSG_TIME 500     // non-blocking UI delay
 
 /* ===== DISPLAYS ===== */
-LiquidCrystal_I2C lcd(0x27, 16, 2);   // Slot display
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1); //Notification text display
+Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 Servo gateServo;
 
@@ -35,6 +36,10 @@ int availableSlots = TOTAL_SLOTS;
 
 unsigned long gateOpenMillis = 0;
 
+/* OLED timing */
+bool oledBusy = false;
+unsigned long oledMillis = 0;
+
 /* ================= SETUP ================= */
 
 void setup() {
@@ -46,22 +51,15 @@ void setup() {
 
   Wire.begin(SDA_PIN, SCL_PIN);
 
-  /* LCD */
   lcd.init();
   lcd.backlight();
 
-  /* OLED */
   if (!oled.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println("OLED not found");
     while (1);
   }
 
-  oled.clearDisplay();
-  oled.setTextSize(1);
-  oled.setTextColor(SSD1306_WHITE);
-  oled.setCursor(0, 0);
-  oled.println("System Ready");
-  oled.display();
+  oledMessage("System Ready");
 
   gateServo.attach(SERVO_PIN);
   gateServo.write(GATE_CLOSE_ANGLE);
@@ -75,9 +73,10 @@ void loop() {
   handleSlot();
   handleEntrance();
   handleGateAutoClose();
+  handleOLEDTimeout();
 }
 
-/* ================= SLOT LOGIC (LCD) ================= */
+/* ================= SLOT LOGIC ================= */
 
 void handleSlot() {
   bool slotOccupied = (digitalRead(IR_SLOT) == LOW);
@@ -101,26 +100,24 @@ void updateSlotLCD() {
   lcd.print(availableSlots);
 }
 
-/* ================= ENTRANCE LOGIC (OLED) ================= */
+/* ================= ENTRANCE LOGIC ================= */
 
 void handleEntrance() {
   bool entranceDetected = (digitalRead(IR_ENTRANCE) == LOW);
 
   if (entranceDetected && !lastEntranceState) {
     Serial.println("[ENTRANCE] Car detected");
-
-    // Always show car detected first
     oledMessage("Car detected");
 
     if (availableSlots == 0) {
       Serial.println("[GATE] Parking full");
-      delay(500); 
+
+      // HIGH PRIORITY → override current OLED message
       oledMessage("Parking FULL");
     }
     else if (!gateOpen) {
       Serial.println("[GATE] Opening");
-      delay(500);
-      oledMessage("Gate opening");
+      queueOLEDMessage("Gate opening");
 
       gateServo.write(GATE_OPEN_ANGLE);
       gateOpen = true;
@@ -143,25 +140,33 @@ void handleGateAutoClose() {
   }
 }
 
-/* ================= OLED HELPER ================= */
+/* ================= OLED HELPERS ================= */
 
 void oledMessage(const char* msg) {
   oled.clearDisplay();
-
   oled.setTextSize(1);
   oled.setTextColor(SSD1306_WHITE);
 
   int16_t x1, y1;
   uint16_t w, h;
-
-  // Text width & height
   oled.getTextBounds(msg, 0, 0, &x1, &y1, &w, &h);
 
-  // Center text
-  int x = (SCREEN_WIDTH - w) / 2;
-  int y = (SCREEN_HEIGHT - h) / 2;
-
-  oled.setCursor(x, y);
+  oled.setCursor((SCREEN_WIDTH - w) / 2, (SCREEN_HEIGHT - h) / 2);
   oled.println(msg);
   oled.display();
+
+  oledBusy = true;
+  oledMillis = millis();
+}
+
+void queueOLEDMessage(const char* msg) {
+  if (!oledBusy) {
+    oledMessage(msg);
+  }
+}
+
+void handleOLEDTimeout() {
+  if (oledBusy && millis() - oledMillis >= OLED_MSG_TIME) {
+    oledBusy = false;
+  }
 }

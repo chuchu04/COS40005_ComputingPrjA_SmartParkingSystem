@@ -5,6 +5,7 @@ import WalletDashboard from './pages/WalletDashboard';
 import ProfilePage from './pages/AdminDashboard';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ApplyReceiptPage from './pages/ApplyReceiptPage';
 import { authService } from './services/api';
 
 function NavBar({ user, onLogout }) {
@@ -16,6 +17,7 @@ function NavBar({ user, onLogout }) {
 
   const authLinks = [
     { to: '/map', label: 'Live Map' },
+    { to: '/receipt', label: 'Receipt' },
     { to: '/wallet', label: 'Wallet' },
     { to: '/profile', label: 'Profile' },
   ];
@@ -149,6 +151,11 @@ export default function App() {
         <Route path="/profile" element={
           <ProtectedRoute user={user}>
             <ProfilePage onLogout={handleLogout} />
+          </ProtectedRoute>
+        } />
+        <Route path="/receipt" element={
+          <ProtectedRoute user={user}>
+            <ApplyReceiptPage />
           </ProtectedRoute>
         } />
 

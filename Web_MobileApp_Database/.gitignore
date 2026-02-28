@@ -1,0 +1,38 @@
+# ── .NET ──
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# ── Node / React ──
+**/node_modules/
+**/dist/
+**/dist-ssr/
+*.local
+
+# ── Logs ──
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ── IDE ──
+.vscode/
+.idea/
+*.sw?
+.DS_Store
+
+# ── Temp claude working dirs/files ──
+tmpclaude-*
+**/tmpclaude-*
+
+# ── OS ──
+Thumbs.db
+Desktop.ini
+
+# ── Misc ──
+nul
+**/nul

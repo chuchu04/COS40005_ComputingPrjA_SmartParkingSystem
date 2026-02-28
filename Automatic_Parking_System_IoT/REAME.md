@@ -9,7 +9,11 @@ AI inference, image processing, and database operations are **handled externally
 
 ## 📌 Demo
 
+🎥 Recommended: watch on a laptop/desktop, 720p for best clarity
+
+```code
 https://liveswinburneeduau-my.sharepoint.com/:v:/g/personal/104663478_student_swin_edu_au/IQDfPWRABZLpRLktFPnx2xjGARYKEp7BMAqSHZeYZpvDJNQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=gSuQU6
+```
 
 ---
 

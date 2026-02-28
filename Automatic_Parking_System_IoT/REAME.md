@@ -110,6 +110,8 @@ GATE_OPEN_TIME defines the minimum time the gate remains open after the vehicle 
 
 The system can be easily extended to support multiple slots for future enhancement.
 
+---
+
 **📚 Required Libraries
 **
 Install via Arduino Library Manager:
@@ -121,6 +123,8 @@ ESP32Servo
 Adafruit GFX Library
 
 Adafruit SSD1306
+
+---
 
 **🖥️ Serial Monitor Output
 **

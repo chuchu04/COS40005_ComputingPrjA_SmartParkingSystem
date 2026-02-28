@@ -65,10 +65,10 @@ Slot available:
 - 16×2 I2C LCD (Address: `0x27`)
 - 0.96" SSD1306 OLED (128×64, Address: `0x3C`)
 - External **5V power supply** (e.g. WH-131)
-- **Common GND** across all components
+- **Common GND** across all components (connected to the WH-131's GND rail)
 
 ⚠️ **Important:**  
-Servo **VCC must be 5V**, not 3.3V.
+Servo **VCC must be 5V**, not 3.3V (3.3v would be insufficient and cause jittering in servo).
 
 ---
 
@@ -94,11 +94,12 @@ Servo **VCC must be 5V**, not 3.3V.
 #define GATE_CLOSE_ANGLE 0
 #define GATE_OPEN_TIME 3000  // milliseconds
 ```
+GATE_OPEN_TIME defines the minimum time the gate remains open after the vehicle leaves the IR sensor range.
 
-The system can be easily extended to support multiple slots.
+The system can be easily extended to support multiple slots for future enhancement.
 
-📚 Required Libraries
-
+**📚 Required Libraries
+**
 Install via Arduino Library Manager:
 
 LiquidCrystal_I2C
@@ -109,25 +110,29 @@ Adafruit GFX Library
 
 Adafruit SSD1306
 
-🖥️ Serial Monitor Output
+**🖥️ Serial Monitor Output
+**
+set Baud rate: 115200
 
-Baud rate: 115200
+_Logs:_
 
-Example logs:
-
+```text
 === Parking System Boot ===
 [SLOT] Available: 1
 [ENTRANCE] Car detected
 [GATE] Opening
 [GATE] Closed
+```
 
-These logs are essential for:
-
+**These logs are essential for:
+**
+```text
 debugging sensor behavior
 
 validating gate logic
 
 live demonstrations
+```
 
 🧩 File Structure
 ```text
@@ -140,6 +145,7 @@ SmartParkingGate/
 
 🚀 Future Improvements (Planned)
 
+```text
 Multi-slot support
 
 RFID card support for non-member drivers
@@ -151,9 +157,11 @@ License plate capture & AI analysis
 Database-backed parking sessions
 
 Mobile / Web dashboard
+```
 
 📝 Notes
 
+```text
 This sketch runs only on the edge device (ESP32-S3)
 
 Designed for clean integration with a Raspberry Pi backend
@@ -161,3 +169,4 @@ Designed for clean integration with a Raspberry Pi backend
 Modular code structure for easy expansion
 
 No blocking delays — safe for real-time control
+```

@@ -15,11 +15,11 @@ AI inference, image processing, and database operations are **handled externally
 - 🔐 **Servo-controlled gate with safety logic**
   - Gate opens when a car is detected and a slot is available
   - Gate **will not close** while a vehicle is still detected by the IR sensor
-  - Gate closes **automatically after a delay** once the vehicle has passed
+  - Gate **closes automatically after a configurable timeout** once the vehicle has passed
 - 📟 **16×2 I2C LCD** for parking slot availability
 - 🖥️ **0.96" OLED (SSD1306)** for entrance notifications
 - ⏱️ **Non-blocking logic**
-  - Uses `millis()` instead of `delay()` to prevent system freezing
+  - All timing (gate auto-close and display updates) is handled using `millis()` instead of `delay()`, ensuring continuous sensor monitoring and safe real-time control.
 - 🧪 **Serial debug logs** for testing and validation
 
 ---
@@ -27,7 +27,7 @@ AI inference, image processing, and database operations are **handled externally
 ## 🧠 System Behavior Overview
 
 ### 🚪 Entrance Flow
-⬇️  
+
 Car detected by **Entrance IR sensor**  
 ⬇️  
 OLED displays: `🚗 Car detected`  
@@ -41,7 +41,7 @@ OLED displays: `🚗 Car detected`
 - OLED displays: `🔓 Gate opening`
 - Servo opens the gate
 - Gate stays open while the car is in IR range
-- After the car exits IR range → gate closes automatically after a timeout
+- After the car exits the IR sensor range → a timeout countdown begins, then the gate closes automatically
 
 ---
 

@@ -19,6 +19,7 @@ https://liveswinburneeduau-my.sharepoint.com/:v:/g/personal/104663478_student_sw
 
 ## 📌 Features
 
+```text
 - 🚘 **Entrance car detection** using IR sensor (triggers AI license plate scanning externally)
 - 🅿️ **Parking slot availability tracking**  
   *(currently single-slot implementation)*
@@ -31,6 +32,7 @@ https://liveswinburneeduau-my.sharepoint.com/:v:/g/personal/104663478_student_sw
 - ⏱️ **Non-blocking logic**
   - All timing (gate auto-close and display updates) is handled using `millis()` instead of `delay()`, ensuring continuous sensor monitoring and safe real-time control.
 - 🧪 **Serial debug logs** for testing and validation
+```
 
 ---
 
@@ -69,13 +71,15 @@ Slot available:
 
 - ESP32-S3
 - IR Sensors ×2  
-- Entrance detection  
-- Slot occupancy detection
+ - Entrance detection  
+ - Slot occupancy detection
 - Servo motor (SG90 / MG90S)
 - 16×2 I2C LCD (Address: `0x27`)
 - 0.96" SSD1306 OLED (128×64, Address: `0x3C`)
 - External **5V power supply** (e.g. WH-131)
-- **Common GND** across all components (connected to the WH-131's GND rail)
+- **Common GND** across all components
+_ (connected to the WH-131's GND rail)
+_
 
 ⚠️ **Important:**  
 Servo **VCC must be 5V**, not 3.3V (3.3v would be insufficient and cause jittering in servo).

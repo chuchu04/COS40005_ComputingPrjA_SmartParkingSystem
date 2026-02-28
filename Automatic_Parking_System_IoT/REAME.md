@@ -7,6 +7,12 @@ AI inference, image processing, and database operations are **handled externally
 
 ---
 
+## 📌 Demo
+
+https://liveswinburneeduau-my.sharepoint.com/:v:/g/personal/104663478_student_swin_edu_au/IQDfPWRABZLpRLktFPnx2xjGARYKEp7BMAqSHZeYZpvDJNQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=gSuQU6
+
+---
+
 ## 📌 Features
 
 - 🚘 **Entrance car detection** using IR sensor (triggers AI license plate scanning externally)

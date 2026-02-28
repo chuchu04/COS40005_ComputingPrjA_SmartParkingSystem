@@ -68,7 +68,7 @@ Slot available:
 ---
 
 ## 🔌 Hardware Requirements
-
+```text
 - ESP32-S3
 - IR Sensors ×2  
  - Entrance detection  
@@ -80,6 +80,7 @@ Slot available:
 - **Common GND** across all components
 _ (connected to the WH-131's GND rail)
 _
+```
 
 ⚠️ **Important:**  
 Servo **VCC must be 5V**, not 3.3V (3.3v would be insufficient and cause jittering in servo).

@@ -78,12 +78,13 @@ Slot available:
 - 0.96" SSD1306 OLED (128×64, Address: `0x3C`)
 - External **5V power supply** (e.g. WH-131)
 - **Common GND** across all components
-_ (connected to the WH-131's GND rail)
-_
+(connected to the WH-131's GND rail)
 ```
 
 ⚠️ **Important:**  
+```text
 Servo **VCC must be 5V**, not 3.3V (3.3v would be insufficient and cause jittering in servo).
+```
 
 ---
 

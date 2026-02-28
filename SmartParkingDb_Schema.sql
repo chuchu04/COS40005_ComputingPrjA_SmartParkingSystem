@@ -1,14 +1,8 @@
--- ============================================================
--- SmartParkingDb — Full SQL Schema (MySQL)
--- Generated from EF Core migration: 20260225094143_InitialCreate
--- Target: MySQL / phpMyAdmin
--- ============================================================
+
 
 SET FOREIGN_KEY_CHECKS = 0;
 
--- ============================================================
 -- 1. ASP.NET Identity Tables
--- ============================================================
 
 CREATE TABLE AspNetUsers (
     Id                   VARCHAR(255)     NOT NULL,
@@ -87,11 +81,8 @@ CREATE TABLE AspNetUserTokens (
         FOREIGN KEY (UserId) REFERENCES AspNetUsers(Id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ============================================================
 -- 2. Application Tables
--- ============================================================
 
--- ParkingSlots (standalone, no FK)
 CREATE TABLE ParkingSlots (
     SlotId     VARCHAR(10)  NOT NULL,
     IsOccupied TINYINT(1)   NOT NULL DEFAULT 0,
@@ -99,8 +90,7 @@ CREATE TABLE ParkingSlots (
     GridY      INT          NOT NULL,
     PRIMARY KEY (SlotId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Wallets (1:1 with AspNetUsers)
+ 
 CREATE TABLE Wallets (
     Id      CHAR(36)       NOT NULL,
     Balance DECIMAL(18, 2) NOT NULL DEFAULT 0,
@@ -110,13 +100,12 @@ CREATE TABLE Wallets (
         FOREIGN KEY (UserId) REFERENCES AspNetUsers(Id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- WalletTransactions (N:1 with Wallets)
 CREATE TABLE WalletTransactions (
     Id        CHAR(36)       NOT NULL,
     Amount    DECIMAL(18, 2) NOT NULL,
     CreatedAt DATETIME       NOT NULL,
-    Type      INT            NOT NULL,  -- 0 = TopUp, 1 = ParkingFee
-    Status    INT            NOT NULL,  -- 0 = Pending, 1 = Completed, 2 = Failed
+    Type      INT            NOT NULL,  
+    Status    INT            NOT NULL,  
     OrderCode BIGINT         NOT NULL,
     WalletId  CHAR(36)       NOT NULL,
     PRIMARY KEY (Id),
@@ -124,7 +113,6 @@ CREATE TABLE WalletTransactions (
         FOREIGN KEY (WalletId) REFERENCES Wallets(Id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- RetailReceipts (standalone)
 CREATE TABLE RetailReceipts (
     ReceiptUid     VARCHAR(50)    NOT NULL,
     PurchaseAmount DECIMAL(18, 2) NOT NULL DEFAULT 0,
@@ -132,7 +120,6 @@ CREATE TABLE RetailReceipts (
     PRIMARY KEY (ReceiptUid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ParkingSessions (N:1 with AspNetUsers, optional FK to RetailReceipts)
 CREATE TABLE ParkingSessions (
     Id                 CHAR(36)       NOT NULL,
     LicensePlate       VARCHAR(20)    NOT NULL,
@@ -140,7 +127,7 @@ CREATE TABLE ParkingSessions (
     ExitTime           DATETIME       NULL,
     CalculatedFee      DECIMAL(18, 2) NULL,
     DiscountAmount     DECIMAL(18, 2) NOT NULL DEFAULT 0,
-    Status             INT            NOT NULL,  -- 0 = Active, 1 = Paid, 2 = Completed
+    Status             INT            NOT NULL,  
     UserId             VARCHAR(255)   NOT NULL,
     AppliedReceiptUid  VARCHAR(50)    NULL,
     PRIMARY KEY (Id),
@@ -150,9 +137,7 @@ CREATE TABLE ParkingSessions (
         FOREIGN KEY (AppliedReceiptUid) REFERENCES RetailReceipts(ReceiptUid) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ============================================================
 -- 3. Indexes
--- ============================================================
 
 -- Identity indexes
 CREATE INDEX IX_AspNetRoleClaims_RoleId   ON AspNetRoleClaims(RoleId);
@@ -167,15 +152,14 @@ CREATE UNIQUE INDEX UserNameIndex         ON AspNetUsers(NormalizedUserName(256)
 -- Application indexes
 CREATE INDEX        IX_ParkingSessions_UserId              ON ParkingSessions(UserId);
 CREATE INDEX        IX_ParkingSessions_AppliedReceiptUid   ON ParkingSessions(AppliedReceiptUid);
-CREATE UNIQUE INDEX IX_Wallets_UserId                      ON Wallets(UserId);           -- enforces 1:1
+CREATE UNIQUE INDEX IX_Wallets_UserId                      ON Wallets(UserId);       
 CREATE INDEX        IX_WalletTransactions_OrderCode        ON WalletTransactions(OrderCode);
 CREATE INDEX        IX_WalletTransactions_WalletId         ON WalletTransactions(WalletId);
 
 SET FOREIGN_KEY_CHECKS = 1;
 
--- ============================================================
+
 -- 4. Seed Data — 20 Parking Slots (5 columns x 4 rows)
--- ============================================================
 
 INSERT INTO ParkingSlots (SlotId, GridX, GridY, IsOccupied)
 VALUES

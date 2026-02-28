@@ -14,6 +14,8 @@ namespace WebApplication1.Models
 
         public bool IsClaimed { get; set; } = false;
 
+        public DateTime? ClaimedAt { get; set; }
+
         // Navigation property
         public ICollection<ParkingSession> ParkingSessions { get; set; } = new List<ParkingSession>();
     }

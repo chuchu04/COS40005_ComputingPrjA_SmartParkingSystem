@@ -1,3 +1,9 @@
+## 🎬 Demo Video
+
+[▶ Watch the demo](https://liveswinburneeduau-my.sharepoint.com/:v:/r/personal/104663478_student_swin_edu_au/Documents/Uni/COS40005%20-%20Computing%20Project%20A/Video%20Demo/2026-03-01%2022-50-33.mkv?csf=1&web=1&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=VBXKsE)
+
+---
+
 # 🚗 Smart Parking Web & Database System
 
 A **full-stack proof-of-concept web application** designed to automate supermarket parking operations. This project simulates an end-to-end vehicle lifecycle — from AI-based license plate entry to automated digital wallet fee deduction upon exit.

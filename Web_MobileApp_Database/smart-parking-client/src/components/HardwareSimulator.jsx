@@ -29,8 +29,8 @@ export default function HardwareSimulator() {
     setSimulationMessage('');
 
     try {
-      const { data } = await api.post('/parking/simulate-exit');
-      setSimulationMessage(`Exit successful. Gate opened and ${Number(data.fee).toLocaleString()} credits deducted.`);
+      await api.post('/parking/simulate-exit');
+      setSimulationMessage('Exit successful. Gate opened and 5000 credits deducted.');
     } catch (err) {
       const msg = err.response?.data?.message || 'Exit failed. Please try again.';
       if (msg.toLowerCase().includes('insufficient')) {
@@ -62,7 +62,7 @@ export default function HardwareSimulator() {
           disabled={loadingEntry || loadingExit}
           style={styles.exitButton}
         >
-          {loadingExit ? 'Processing...' : 'Exit'}
+          {loadingExit ? 'Processing...' : 'Simulate Car Exit'}
         </button>
       </div>
 

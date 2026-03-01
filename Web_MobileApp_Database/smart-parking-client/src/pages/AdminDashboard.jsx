@@ -149,28 +149,12 @@ export default function ProfilePage({ onLogout }) {
 
               {/* Accrued Fee */}
               <div style={styles.feeCard}>
-                <div style={styles.feeLabel}>Base Fee</div>
+                <div style={styles.feeLabel}>Accrued Fee</div>
                 <div style={styles.feeAmount}>{formatVND(activeSession.currentFee)}</div>
               </div>
 
-              {/* Discount row */}
-              {activeSession.discount > 0 && (
-                <div style={styles.discountCard}>
-                  <div style={styles.discountLabel}>🧾 Receipt Discount</div>
-                  <div style={styles.discountAmount}>-{formatVND(activeSession.discount)}</div>
-                </div>
-              )}
-
-              {/* Final Fee */}
-              {activeSession.discount > 0 && (
-                <div style={styles.feeCard}>
-                  <div style={styles.feeLabel}>Final Fee</div>
-                  <div style={{...styles.feeAmount, color: '#059669'}}>{formatVND(activeSession.finalFee)}</div>
-                </div>
-              )}
-
               {/* Insufficient balance warning */}
-              {walletBalance < (activeSession.finalFee ?? activeSession.currentFee) && (
+              {walletBalance < activeSession.currentFee && (
                 <div style={styles.warningBadge}>
                   ⚠️ Insufficient balance for exit. Please top up!
                 </div>
@@ -347,27 +331,6 @@ const styles = {
     fontSize: '28px',
     fontWeight: 700,
     color: '#1d4ed8',
-  },
-  /* ── Discount ── */
-  discountCard: {
-    background: '#f0fdf4',
-    border: '1px solid #bbf7d0',
-    borderRadius: '12px',
-    padding: '14px 20px',
-    textAlign: 'center',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  discountLabel: {
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#059669',
-  },
-  discountAmount: {
-    fontSize: '18px',
-    fontWeight: 700,
-    color: '#059669',
   },
   /* ── Warning ── */
   warningBadge: {

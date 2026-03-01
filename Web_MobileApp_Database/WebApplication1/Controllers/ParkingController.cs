@@ -88,12 +88,6 @@ namespace WebApplication1.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            var existingSession = await _context.ParkingSessions
-                .AnyAsync(s => s.UserId == userId && s.Status == SessionStatus.Active);
-
-            if (existingSession)
-                return BadRequest(new { message = "You already have an active parking session. Please exit first." });
-
             var slot = await _context.ParkingSlots
                 .FirstOrDefaultAsync(s => !s.IsOccupied);
 
@@ -146,16 +140,11 @@ namespace WebApplication1.Controllers
                 currentFee += overtimeHours * 1_000;
             }
 
-            var discount = session.DiscountAmount;
-            var finalFee = Math.Max(0, currentFee - discount);
-
             return Ok(new
             {
                 licensePlate = session.LicensePlate,
                 entryTime = session.EntryTime,
                 currentFee,
-                discount,
-                finalFee,
                 durationHours = Math.Round((decimal)totalHours, 2)
             });
         }
@@ -193,27 +182,23 @@ namespace WebApplication1.Controllers
                     calculatedFee += overtimeHours * 1_000;
                 }
 
-                // Apply discount from retail receipt
-                var discount = session.DiscountAmount;
-                var finalFee = Math.Max(0, calculatedFee - discount);
-
                 // Check wallet balance
                 var wallet = await _context.Wallets
                     .FirstOrDefaultAsync(w => w.UserId == userId);
 
-                if (wallet == null || wallet.Balance < finalFee)
+                if (wallet == null || wallet.Balance < calculatedFee)
                     return BadRequest(new
                     {
-                        message = $"Insufficient balance. The parking fee is {finalFee} credits (after {discount} discount), but your balance is only {wallet?.Balance ?? 0}."
+                        message = $"Insufficient balance. The parking fee is {calculatedFee} credits, but your balance is only {wallet?.Balance ?? 0}."
                     });
 
                 // Deduct fee
-                wallet.Balance -= finalFee;
+                wallet.Balance -= calculatedFee;
 
                 // Create transaction record
                 var walletTx = new WalletTransaction
                 {
-                    Amount = finalFee,
+                    Amount = calculatedFee,
                     Type = TransactionType.ParkingFee,
                     Status = TransactionStatus.Completed,
                     CreatedAt = now,
@@ -224,7 +209,7 @@ namespace WebApplication1.Controllers
 
                 // Close session
                 session.ExitTime = now;
-                session.CalculatedFee = finalFee;
+                session.CalculatedFee = calculatedFee;
                 session.Status = SessionStatus.Completed;
 
                 // Free a slot
@@ -243,8 +228,7 @@ namespace WebApplication1.Controllers
                 {
                     message = "Exit successful.",
                     licensePlate = session.LicensePlate,
-                    fee = finalFee,
-                    discount,
+                    fee = calculatedFee,
                     durationHours = Math.Round((decimal)totalHours, 2),
                     newBalance = wallet.Balance,
                     slotFreed = slot?.SlotId
@@ -255,54 +239,6 @@ namespace WebApplication1.Controllers
                 await transaction.RollbackAsync();
                 return StatusCode(500, new { message = "Exit failed.", error = ex.Message });
             }
-        }
-
-        // POST api/parking/apply-receipt
-        [Authorize]
-        [HttpPost("apply-receipt")]
-        public async Task<IActionResult> ApplyReceipt([FromBody] DTOs.ApplyReceiptRequest request)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized();
-
-            var session = await _context.ParkingSessions
-                .FirstOrDefaultAsync(s => s.UserId == userId && s.Status == SessionStatus.Active);
-
-            if (session == null)
-                return BadRequest(new { message = "No active parking session found." });
-
-            if (session.AppliedReceiptUid != null)
-                return BadRequest(new { message = "A discount receipt has already been applied to this session." });
-
-            var receipt = await _context.RetailReceipts
-                .FirstOrDefaultAsync(r => r.ReceiptUid == request.ReceiptUid);
-
-            if (receipt == null)
-                return NotFound(new { message = "Invalid receipt code." });
-
-            if (receipt.IsClaimed)
-                return BadRequest(new { message = "This receipt has already been claimed." });
-
-            // Calculate discount based on purchase amount
-            decimal discountAmount;
-            if (receipt.PurchaseAmount >= 500_000)
-                discountAmount = 10_000;
-            else if (receipt.PurchaseAmount >= 200_000)
-                discountAmount = 5_000;
-            else
-                discountAmount = 0;
-
-            // Update receipt
-            receipt.IsClaimed = true;
-            receipt.ClaimedAt = DateTime.UtcNow;
-
-            // Update session
-            session.AppliedReceiptUid = receipt.ReceiptUid;
-            session.DiscountAmount = discountAmount;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = $"Discount of {discountAmount:N0} credits applied successfully.", discountAmount });
         }
     }
 }

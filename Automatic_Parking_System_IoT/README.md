@@ -7,6 +7,16 @@ AI inference, image processing, and database operations are **handled externally
 
 ---
 
+## 📌 Demo
+
+🎥 Recommended: watch on a laptop/desktop, 720p for best clarity
+
+```code
+https://liveswinburneeduau-my.sharepoint.com/:v:/g/personal/104663478_student_swin_edu_au/IQDfPWRABZLpRLktFPnx2xjGARYKEp7BMAqSHZeYZpvDJNQ?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=gSuQU6
+```
+
+---
+
 ## 📌 Features
 
 - 🚘 **Entrance car detection** using IR sensor (triggers AI license plate scanning externally)
@@ -56,16 +66,18 @@ Slot available:
 ---
 
 ## 🔌 Hardware Requirements
-
 - ESP32-S3
 - IR Sensors ×2  
-- Entrance detection  
-- Slot occupancy detection
+  - Entrance detection  
+  - Slot occupancy detection
 - Servo motor (SG90 / MG90S)
 - 16×2 I2C LCD (Address: `0x27`)
 - 0.96" SSD1306 OLED (128×64, Address: `0x3C`)
 - External **5V power supply** (e.g. WH-131)
-- **Common GND** across all components (connected to the WH-131's GND rail)
+- **Common GND** across all components
+(connected to the WH-131's GND rail)
+
+---
 
 ⚠️ **Important:**  
 Servo **VCC must be 5V**, not 3.3V (3.3v would be insufficient and cause jittering in servo).
@@ -98,6 +110,8 @@ GATE_OPEN_TIME defines the minimum time the gate remains open after the vehicle 
 
 The system can be easily extended to support multiple slots for future enhancement.
 
+---
+
 **📚 Required Libraries
 **
 Install via Arduino Library Manager:
@@ -109,6 +123,8 @@ ESP32Servo
 Adafruit GFX Library
 
 Adafruit SSD1306
+
+---
 
 **🖥️ Serial Monitor Output
 **

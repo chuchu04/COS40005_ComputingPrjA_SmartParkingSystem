@@ -428,9 +428,6 @@ namespace WebApplication1.Database
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
-                    b.Property<DateTime?>("ClaimedAt")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<bool>("IsClaimed")
                         .HasColumnType("tinyint(1)");
 

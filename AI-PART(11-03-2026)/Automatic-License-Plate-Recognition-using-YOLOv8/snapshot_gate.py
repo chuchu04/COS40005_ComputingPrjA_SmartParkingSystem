@@ -12,17 +12,19 @@ from util import get_car, read_license_plate
 # -----------------------------
 # Config
 # -----------------------------
-SOURCE = "./sample2.mp4"     # 0 = webcam, or path to video
-BURST_SIZE = 3               # capture 3 frames after trigger
-TRIGGER_CONSEC_FRAMES = 3    # require vehicle in trigger zone for 3 frames
-CLEAR_TO_REARM = 8           # number of clear frames before allowing next trigger
+SOURCE = "./sample2.mp4"   # 0 = webcam, or path to video
+MODE = "exit"             # "entry" or "exit"
+
+BURST_SIZE = 3
+TRIGGER_CONSEC_FRAMES = 3
+CLEAR_TO_REARM = 8
 SHOW_PREVIEW = True
-STOP_AFTER_FIRST_EVENT = True   # True = faster for single-car test videos
+STOP_AFTER_FIRST_EVENT = True
 
 SAVE_DIR = "captures"
 FULL_DIR = os.path.join(SAVE_DIR, "full_frames")
 CROP_DIR = os.path.join(SAVE_DIR, "plate_crops")
-EVENT_LOG = os.path.join(SAVE_DIR, "events_log.csv")
+SESSIONS_CSV = os.path.join(SAVE_DIR, "parking_sessions.csv")
 
 VEHICLE_CLASSES = [2, 3, 5, 7]  # car, motorcycle, bus, truck
 
@@ -44,15 +46,168 @@ def now_str():
 
 
 def make_session_id():
-    return f"entry_{now_str()}_{uuid.uuid4().hex[:6]}"
+    return f"{MODE}_{now_str()}_{uuid.uuid4().hex[:6]}"
+
+
+def ensure_sessions_csv():
+    if not os.path.exists(SESSIONS_CSV):
+        with open(SESSIONS_CSV, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(
+                f,
+                fieldnames=[
+                    "session_id",
+                    "plate_number",
+                    "entry_time",
+                    "exit_time",
+                    "entry_confidence",
+                    "exit_confidence",
+                    "entry_full_image_path",
+                    "exit_full_image_path",
+                    "entry_plate_crop_path",
+                    "exit_plate_crop_path",
+                    "entry_vehicle_bbox",
+                    "exit_vehicle_bbox",
+                    "entry_plate_bbox",
+                    "exit_plate_bbox",
+                    "status"
+                ]
+            )
+            writer.writeheader()
+
+
+def read_sessions():
+    ensure_sessions_csv()
+    with open(SESSIONS_CSV, "r", newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
+
+def write_sessions(rows):
+    with open(SESSIONS_CSV, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(
+            f,
+            fieldnames=[
+                "session_id",
+                "plate_number",
+                "entry_time",
+                "exit_time",
+                "entry_confidence",
+                "exit_confidence",
+                "entry_full_image_path",
+                "exit_full_image_path",
+                "entry_plate_crop_path",
+                "exit_plate_crop_path",
+                "entry_vehicle_bbox",
+                "exit_vehicle_bbox",
+                "entry_plate_bbox",
+                "exit_plate_bbox",
+                "status"
+            ]
+        )
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def save_images(best_result, session_id):
+    full_path = os.path.join(FULL_DIR, f"{session_id}_full.jpg")
+    crop_path = os.path.join(CROP_DIR, f"{session_id}_plate.jpg")
+
+    cv2.imwrite(full_path, best_result["frame"])
+    cv2.imwrite(crop_path, best_result["plate_crop"])
+
+    return full_path, crop_path
+
+
+def create_entry_session(best_result):
+    rows = read_sessions()
+
+    session_id = make_session_id()
+    timestamp = now_str()
+    full_path, crop_path = save_images(best_result, session_id)
+
+    event = {
+        "session_id": session_id,
+        "plate_number": best_result["plate_text"],
+        "entry_time": timestamp,
+        "exit_time": "",
+        "entry_confidence": round(best_result["ocr_score"], 4),
+        "exit_confidence": "",
+        "entry_full_image_path": full_path,
+        "exit_full_image_path": "",
+        "entry_plate_crop_path": crop_path,
+        "exit_plate_crop_path": "",
+        "entry_vehicle_bbox": json.dumps(best_result["car_bbox"]),
+        "exit_vehicle_bbox": "",
+        "entry_plate_bbox": json.dumps(best_result["plate_bbox"]),
+        "exit_plate_bbox": "",
+        "status": "active"
+    }
+
+    rows.append(event)
+    write_sessions(rows)
+    return event
+
+
+def find_active_session_by_plate(plate_number):
+    rows = read_sessions()
+    for row in rows:
+        if row["plate_number"] == plate_number and row["status"] == "active":
+            return row["session_id"]
+    return None
+
+
+def update_exit_session(best_result):
+    rows = read_sessions()
+
+    plate_number = best_result["plate_text"]
+    matched_id = find_active_session_by_plate(plate_number)
+
+    timestamp = now_str()
+
+    if matched_id is None:
+        # no matching active session found
+        session_id = make_session_id()
+        full_path, crop_path = save_images(best_result, session_id)
+
+        event = {
+            "session_id": session_id,
+            "plate_number": plate_number,
+            "entry_time": "",
+            "exit_time": timestamp,
+            "entry_confidence": "",
+            "exit_confidence": round(best_result["ocr_score"], 4),
+            "entry_full_image_path": "",
+            "exit_full_image_path": full_path,
+            "entry_plate_crop_path": "",
+            "exit_plate_crop_path": crop_path,
+            "entry_vehicle_bbox": "",
+            "exit_vehicle_bbox": json.dumps(best_result["car_bbox"]),
+            "entry_plate_bbox": "",
+            "exit_plate_bbox": json.dumps(best_result["plate_bbox"]),
+            "status": "review"
+        }
+
+        rows.append(event)
+        write_sessions(rows)
+        return event, False
+
+    # matched active entry -> close session
+    for row in rows:
+        if row["session_id"] == matched_id and row["status"] == "active":
+            full_path, crop_path = save_images(best_result, matched_id + "_exit")
+            row["exit_time"] = timestamp
+            row["exit_confidence"] = round(best_result["ocr_score"], 4)
+            row["exit_full_image_path"] = full_path
+            row["exit_plate_crop_path"] = crop_path
+            row["exit_vehicle_bbox"] = json.dumps(best_result["car_bbox"])
+            row["exit_plate_bbox"] = json.dumps(best_result["plate_bbox"])
+            row["status"] = "completed"
+            write_sessions(rows)
+            return row, True
+
+    return None, False
 
 
 def in_trigger_zone(box, frame_shape):
-    """
-    Simple camera-only trigger zone.
-    A vehicle is considered 'at barrier' if its center is inside
-    the middle-lower region of the frame.
-    """
     h, w = frame_shape[:2]
     x1, y1, x2, y2 = box
     cx = (x1 + x2) / 2.0
@@ -67,11 +222,6 @@ def in_trigger_zone(box, frame_shape):
 
 
 def detect_trigger_vehicle(frame):
-    """
-    Detect whether at least one vehicle is in the trigger zone.
-    Returns:
-      triggered (bool), vehicles (list of [x1,y1,x2,y2,score,class_id])
-    """
     detections = coco_model(frame)[0]
     vehicles = []
 
@@ -85,10 +235,6 @@ def detect_trigger_vehicle(frame):
 
 
 def crop_plate_for_ocr(frame, x1, y1, x2, y2):
-    """
-    Same crop logic as your working main.py baseline:
-    padding + upscale + grayscale + CLAHE + bilateral + adaptive threshold.
-    """
     h, w = frame.shape[:2]
 
     pad_x = int((x2 - x1) * 0.10)
@@ -135,12 +281,6 @@ def crop_plate_for_ocr(frame, x1, y1, x2, y2):
 
 
 def alpr_on_frame(frame):
-    """
-    Run ALPR on one frame and return the best candidate in that frame.
-    Uses the same logic as your working baseline:
-      vehicle detection -> plate detection -> OCR on grayscale vs threshold
-    """
-    # Detect vehicles
     vehicle_dets = coco_model(frame)[0]
     vehicle_boxes = []
 
@@ -152,14 +292,12 @@ def alpr_on_frame(frame):
     if not vehicle_boxes:
         return None
 
-    # Detect plates
     plates = license_plate_detector(frame)[0]
     best = None
 
     for plate in plates.boxes.data.tolist():
         x1, y1, x2, y2, plate_score, class_id = plate
 
-        # assign plate to detected vehicle
         xcar1, ycar1, xcar2, ycar2, car_id = get_car(plate, vehicle_boxes)
         if car_id == -1:
             continue
@@ -197,7 +335,6 @@ def alpr_on_frame(frame):
             "frame": frame.copy()
         }
 
-        # rank best candidate within this frame
         rank = (candidate["valid_format"], candidate["ocr_score"], candidate["plate_score"])
         if best is None or rank > (
             best["valid_format"], best["ocr_score"], best["plate_score"]
@@ -208,13 +345,6 @@ def alpr_on_frame(frame):
 
 
 def choose_best_from_burst(candidates):
-    """
-    Pick the best result from the burst of 2-3 frames.
-    Priority:
-      1) valid VN-like plate
-      2) OCR score
-      3) plate detection score
-    """
     if not candidates:
         return None
 
@@ -229,72 +359,12 @@ def choose_best_from_burst(candidates):
     return candidates[0]
 
 
-def save_event(best_result):
-    """
-    Save the chosen full frame + plate crop and return an event object.
-    """
-    session_id = make_session_id()
-    timestamp = now_str()
-
-    full_path = os.path.join(FULL_DIR, f"{session_id}_full.jpg")
-    crop_path = os.path.join(CROP_DIR, f"{session_id}_plate.jpg")
-
-    cv2.imwrite(full_path, best_result["frame"])
-    cv2.imwrite(crop_path, best_result["plate_crop"])
-
-    event = {
-        "session_id": session_id,
-        "plate_number": best_result["plate_text"],
-        "confidence": round(best_result["ocr_score"], 4),
-        "timestamp": timestamp,
-        "vehicle_bbox": best_result["car_bbox"],
-        "plate_bbox": best_result["plate_bbox"],
-        "full_image_path": full_path,
-        "plate_crop_path": crop_path,
-        "status": "active"
-    }
-    return event
-
-
-def append_event_to_csv(event):
-    """
-    Append event to CSV log.
-    """
-    file_exists = os.path.exists(EVENT_LOG)
-
-    with open(EVENT_LOG, "a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(
-            f,
-            fieldnames=[
-                "session_id",
-                "plate_number",
-                "confidence",
-                "timestamp",
-                "full_image_path",
-                "plate_crop_path",
-                "status"
-            ]
-        )
-
-        if not file_exists:
-            writer.writeheader()
-
-        writer.writerow({
-            "session_id": event["session_id"],
-            "plate_number": event["plate_number"],
-            "confidence": event["confidence"],
-            "timestamp": event["timestamp"],
-            "full_image_path": event["full_image_path"],
-            "plate_crop_path": event["plate_crop_path"],
-            "status": event["status"]
-        })
-
-
 # -----------------------------
 # Main gate loop
 # -----------------------------
-cap = cv2.VideoCapture(SOURCE)
+ensure_sessions_csv()
 
+cap = cv2.VideoCapture(SOURCE)
 if not cap.isOpened():
     raise RuntimeError("Could not open camera/video source.")
 
@@ -309,7 +379,6 @@ while True:
 
     triggered, vehicles = detect_trigger_vehicle(frame)
 
-    # simple trigger state machine
     if triggered:
         trigger_count += 1
         clear_count = 0
@@ -319,7 +388,6 @@ while True:
         if clear_count >= CLEAR_TO_REARM:
             armed = True
 
-    # draw trigger zone preview
     if SHOW_PREVIEW:
         h, w = frame.shape[:2]
         zx1, zx2 = int(w * 0.20), int(w * 0.80)
@@ -331,11 +399,10 @@ while True:
             color = (0, 255, 0) if in_trigger_zone(v[:4], frame.shape) else (255, 0, 0)
             cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
 
-        status_text = f"Armed: {armed} | Trigger count: {trigger_count}"
+        status_text = f"Mode: {MODE} | Armed: {armed} | Trigger count: {trigger_count}"
         cv2.putText(frame, status_text, (20, 40),
                     cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 255), 2)
 
-    # fire capture when car has stayed in zone long enough
     if armed and trigger_count >= TRIGGER_CONSEC_FRAMES:
         burst_frames = [frame.copy()]
 
@@ -354,12 +421,19 @@ while True:
         best_result = choose_best_from_burst(burst_results)
 
         if best_result is not None:
-            event = save_event(best_result)
-            append_event_to_csv(event)
+            if MODE == "entry":
+                event = create_entry_session(best_result)
+                print("\n=== ENTRY EVENT ===")
+                print(json.dumps(event, indent=2))
+            elif MODE == "exit":
+                event, matched = update_exit_session(best_result)
+                if matched:
+                    print("\n=== EXIT MATCHED ===")
+                else:
+                    print("\n=== EXIT NEEDS REVIEW ===")
+                print(json.dumps(event, indent=2))
 
-            print("\n=== GATE EVENT ===")
-            print(json.dumps(event, indent=2))
-            print(f"\nSaved event log to: {EVENT_LOG}")
+            print(f"\nSaved sessions log to: {SESSIONS_CSV}")
 
             if STOP_AFTER_FIRST_EVENT:
                 break

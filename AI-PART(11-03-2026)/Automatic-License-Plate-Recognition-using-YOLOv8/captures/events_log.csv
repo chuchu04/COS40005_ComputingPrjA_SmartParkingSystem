@@ -1,0 +1,2 @@
+session_id,plate_number,confidence,timestamp,full_image_path,plate_crop_path,status
+entry_20260309_144010_7cd054,51M-781.03,0.3803,20260309_144010,captures\full_frames\entry_20260309_144010_7cd054_full.jpg,captures\plate_crops\entry_20260309_144010_7cd054_plate.jpg,active

@@ -1,0 +1,8 @@
+ultralytics==8.4.22
+easyocr
+opencv-python
+numpy
+pillow
+onnx>=1.12.0
+onnxsim>=0.4.17
+onnxruntime-gpu

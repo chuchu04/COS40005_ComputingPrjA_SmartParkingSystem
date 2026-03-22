@@ -1,0 +1,11 @@
+source_path,source_type,status,plate_number,confidence,valid_format,frame_index,runtime_sec,plate_bbox,
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test1\Chau1.mp4,video,detected,43346CV03,0.9211,0,27,61.1431,"[648.9956665039062, 479.75054931640625, 1255.8914794921875, 661.9366455078125]",foregin plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test1\Chau2.mp4,video,no_detection,,0,0,-1,41.536,,only 1 frame video
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test1\Chau3.mp4,video,detected,1660527,0.4361,0,23,46.289,"[854.3215942382812, 440.689453125, 1074.713623046875, 607.6115112304688]",1 frame video
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test1\Chau4.mp4,video,detected,30E-922.91,1.0971,1,109,49.8625,"[771.3649291992188, 701.9547729492188, 1198.06884765625, 824.53271484375]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test1\Chau5.mp4,video,detected,98C-295.00,0.8849,1,31,49.2615,"[245.1950225830078, 747.4030151367188, 512.3164672851562, 867.3015747070312]",AI video- 88C-295.00
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test1\Chau6.mp4,video,detected,47A-479.69,1.0476,1,329,63.9619,"[240.35797119140625, 209.8100128173828, 535.0219116210938, 292.687744140625]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test1\Chau7.mp4,video,detected,47A-479.69,1.103,1,624,67.4934,"[383.4481506347656, 332.336181640625, 728.8703002929688, 419.9674377441406]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test1\Chau8.mp4,video,detected,51L-930.75,1.0571,1,58,58.429,"[792.1546020507812, 385.7939453125, 987.775390625, 550.6143798828125]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test1\Video Project 15 1saaaaazd.mp4,video,no_detection,,0,0,-1,29.6289,,quite clear video
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test1\Video Project 16.mp4,video,no_detection,,0,0,-1,33.3966,,not enough plate in video

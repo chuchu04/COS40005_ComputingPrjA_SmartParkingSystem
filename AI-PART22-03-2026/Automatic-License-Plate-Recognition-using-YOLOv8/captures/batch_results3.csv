@@ -1,0 +1,22 @@
+source_path,source_type,status,plate_number,confidence,valid_format,frame_index,runtime_sec,plate_bbox,
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark10.mp4,video,no_detection,,0,0,-1,24.9783,,dazzling plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark11.mp4,video,no_detection,,0,0,-1,26.0522,,dazzling plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark12.mp4,video,detected,51G-680.31,1.1112,1,140,21.5618,"[245.0428466796875, 744.367431640625, 481.771240234375, 832.4090576171875]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark13.mp4,video,detected,56N4077,0.9088,1,129,16.8611,"[267.92449951171875, 770.0123291015625, 528.509521484375, 866.0985107421875]",Old format of plate missing - 56N-4077
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark14.mp4,video,detected,51D-485.10,0.9737,1,8,24.8624,"[236.10198974609375, 659.08447265625, 496.63250732421875, 760.6031494140625]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark16.mp4,video,detected,51L-838.06,1.0441,1,79,37.0347,"[225.28314208984375, 807.7164306640625, 576.3265380859375, 929.2703857421875]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark17.mp4,video,no_detection,,0,0,-1,19.7665,,dazzling plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark18.mp4,video,no_detection,,0,0,-1,18.1794,,dazzling AND yellow plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark19.mp4,video,detected,72E-001.55,1.1188,1,243,38.0773,"[195.89801025390625, 807.814208984375, 494.78472900390625, 903.0205078125]",yellow plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark20.mp4,video,detected,51C-803.71,1.1171,1,133,25.1606,"[216.90533447265625, 723.6070556640625, 506.064208984375, 810.0772705078125]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark21.mp4,video,detected,50H-365.29,1.1049,1,143,17.2912,"[209.59864807128906, 824.3546142578125, 472.93603515625, 903.1693115234375]",yellow plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test3\dark22.mp4,video,detected,51L-328.07,1.0201,1,185,21.0349,"[229.28533935546875, 766.9549560546875, 545.4044799804688, 856.54296875]",
+,,,,,,,,,
+,,,,,,,,,
+ BATCH SUMMARY videotest3,,,,,,,,,
+Total sources: 12,,,,,,,,,
+Detected: 8,,,,,,,,,
+Valid format: 8,,,,,,,,,
+Total folder time: 291.17 seconds,,,,,,,,,
+Average time per source: 24.26 seconds,,,,,,,,,
+Saved CSV: captures\batch_results.csv,,,,,,,,,

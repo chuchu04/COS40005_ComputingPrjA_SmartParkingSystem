@@ -1,0 +1,22 @@
+source_path,source_type,status,plate_number,confidence,valid_format,frame_index,runtime_sec,plate_bbox,
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test2\dark.mp4,video,detected,61G-322.44,0.926,1,121,16.7183,"[344.21771240234375, 720.1365966796875, 539.5120239257812, 801.0670166015625]",51G-322.44-Video a little bit dark
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test2\dark1.mp4,video,no_detection,,0,0,-1,48.141,,dazzling plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test2\dark2.mp4,video,detected,79A-271.15,1.1184,1,146,39.0027,"[234.17041015625, 738.8121948242188, 492.193603515625, 835.8565063476562]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test2\dark3.mp4,video,detected,51A-282.40,1.0045,1,289,61.0915,"[384.04205322265625, 719.6866455078125, 661.9872436523438, 837.4400634765625]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test2\dark4.mp4,video,detected,61A-374.88,1.0452,1,94,47.2111,"[259.21722412109375, 786.47607421875, 604.7296752929688, 889.946044921875]",51A-374.88-Clear plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test2\dark5.mp4,video,detected,63A-413.24,1.029,1,140,19.1894,"[225.98855590820312, 572.4110107421875, 466.6126403808594, 654.8524169921875]",
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test2\dark6.mp4,video,no_detection,,0,0,-1,24.9684,,dark video
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test2\dark7.mp4,video,no_detection,,0,0,-1,26.4587,,dazzling plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test2\dark8.mp4,video,no_detection,,0,0,-1,21.172,,dazzling plate
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test2\dark9.mp4,video,no_detection,,0,0,-1,27.1124,,dazzling plate
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+,,,,,,,,,
+ BATCH SUMMARY video test  2,,,,,,,,,
+Total sources: 10,,,,,,,,,
+Detected: 5,,,,,,,,,
+Valid format: 5,,,,,,,,,
+Total folder time: 331.33 seconds,,,,,,,,,
+Average time per source: 33.13 seconds,,,,,,,,,
+Saved CSV: captures\batch_results.csv,,,,,,,,,

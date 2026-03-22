@@ -1,0 +1,9 @@
+source_path,source_type,status,plate_number,confidence,valid_format,frame_index,runtime_sec,plate_bbox
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test\Video Project 13 122.mp4,video,no_detection,,0.0,0,-1,19.3147,
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test\Video Project 14.mp4,video,detected,36A-474.76,1.0524,1,27,35.4644,"[738.91796875, 615.7457275390625, 1491.3343505859375, 863.9057006835938]"
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test\Video Project 15 1.mp4,video,no_detection,,0.0,0,-1,30.991,
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test\Video Project 15 1s.mp4,video,detected,61D-392.17,0.9847,1,61,25.9168,"[774.7137451171875, 683.5891723632812, 1099.4619140625, 794.8106689453125]"
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test\Video Project 15 1saaa.mp4,video,no_detection,,0.0,0,-1,26.1806,
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test\Video Project 15 1saaaaa.mp4,video,no_detection,,0.0,0,-1,68.2086,
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test\Video Project 15 1saaaaaz.mp4,video,detected,51L-344.29,1.1077,1,42,50.9171,"[945.838623046875, 784.380615234375, 1398.651123046875, 942.2001342773438]"
+C:\Users\PC\Automatic-License-Plate-Recognition-using-YOLOv8\video test\Video Project 15.mp4,video,detected,51B-685.16,0.8126,1,3,411.3206,"[464.99853515625, 482.707763671875, 754.3055419921875, 775.972412109375]"

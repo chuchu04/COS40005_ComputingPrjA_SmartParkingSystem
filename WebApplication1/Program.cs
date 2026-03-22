@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using WebApplication1.Data;
 using WebApplication1.Models;
+using WebApplication1.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,18 +44,25 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<SonarProcessor>();
+builder.Services.AddSingleton<MqttBrokerService>();
+builder.Services.AddSingleton<GateControlService>();
+builder.Services.AddSingleton<VnpayService>();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
+
+// Ensure the MQTT broker singleton is created so sonar subscription starts on app startup.
+_ = app.Services.GetRequiredService<MqttBrokerService>();
 
 // --- Middleware ---
 app.UseCors("AllowFrontend");

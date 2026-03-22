@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using WebApplication1.Data;
 using WebApplication1.DTOs;
 using WebApplication1.Models;
+using WebApplication1.Services;
 
 namespace WebApplication1.Controllers
 {
@@ -15,12 +16,14 @@ namespace WebApplication1.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IMemoryCache _cache;
+        private readonly GateControlService _gateControlService;
         private const string MapCacheKey = "ParkingMapData";
 
-        public ParkingController(ApplicationDbContext context, IMemoryCache cache)
+        public ParkingController(ApplicationDbContext context, IMemoryCache cache, GateControlService gateControlService)
         {
             _context = context;
             _cache = cache;
+            _gateControlService = gateControlService;
         }
 
         // GET api/parking/map
@@ -88,14 +91,34 @@ namespace WebApplication1.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
+            var existingSession = await _context.ParkingSessions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.Status == SessionStatus.Active);
+
+            if (existingSession != null)
+            {
+                return Conflict(new
+                {
+                    warning = "You already have an active parking session.",
+                    licensePlate = existingSession.LicensePlate,
+                    entryTime = existingSession.EntryTime
+                });
+            }
+
+            const int maxParkingSlots = 20;
+            var activeSessionsCount = await _context.ParkingSessions
+                .CountAsync(s => s.Status == SessionStatus.Active);
+
+            if (activeSessionsCount >= maxParkingSlots)
+            {
+                return BadRequest(new { message = "Parking lot is full." });
+            }
+
             var slot = await _context.ParkingSlots
                 .FirstOrDefaultAsync(s => !s.IsOccupied);
 
             if (slot == null)
                 return BadRequest(new { message = "Parking lot is full." });
-
-            slot.IsOccupied = true;
-            _cache.Remove(MapCacheKey);
 
             var plate = "MOCK-" + Random.Shared.Next(1000, 9999);
 
@@ -131,14 +154,7 @@ namespace WebApplication1.Controllers
             var now = DateTime.UtcNow;
             var duration = now - session.EntryTime;
             var totalHours = duration.TotalHours;
-
-            decimal currentFee = 10_000;
-
-            if (totalHours > 24)
-            {
-                var overtimeHours = (int)Math.Ceiling(totalHours - 24);
-                currentFee += overtimeHours * 1_000;
-            }
+            var currentFee = CalculateDynamicFee(session.EntryTime);
 
             return Ok(new
             {
@@ -158,6 +174,7 @@ namespace WebApplication1.Controllers
             if (userId == null) return Unauthorized();
 
             using var transaction = await _context.Database.BeginTransactionAsync();
+            var isCommitted = false;
 
             try
             {
@@ -167,78 +184,140 @@ namespace WebApplication1.Controllers
                 if (session == null)
                     return BadRequest(new { message = "No active parking session found." });
 
-                // Calculate duration & dynamic fee
                 var now = DateTime.UtcNow;
-                var duration = now - session.EntryTime;
-                var totalHours = duration.TotalHours;
-
-                // Base fee: 10,000 for the first 24 hours
-                decimal calculatedFee = 10_000;
-
-                // Overtime: +1,000 per additional hour (partial hours rounded up)
-                if (totalHours > 24)
+                var exitResult = await ProcessSessionExitAsync(session, userId, now);
+                if (!exitResult.Success)
                 {
-                    var overtimeHours = (int)Math.Ceiling(totalHours - 24);
-                    calculatedFee += overtimeHours * 1_000;
-                }
+                    var gateNotified = false;
+                    string? unpaidGateError = null;
 
-                // Check wallet balance
-                var wallet = await _context.Wallets
-                    .FirstOrDefaultAsync(w => w.UserId == userId);
+                    try
+                    {
+                        await _gateControlService.NotifyUnpaidAsync();
+                        gateNotified = true;
+                    }
+                    catch (Exception mqttEx)
+                    {
+                        unpaidGateError = mqttEx.Message;
+                    }
 
-                if (wallet == null || wallet.Balance < calculatedFee)
                     return BadRequest(new
                     {
-                        message = $"Insufficient balance. The parking fee is {calculatedFee} credits, but your balance is only {wallet?.Balance ?? 0}."
+                        message = exitResult.ErrorMessage,
+                        gateNotified,
+                        gateError = unpaidGateError
                     });
-
-                // Deduct fee
-                wallet.Balance -= calculatedFee;
-
-                // Create transaction record
-                var walletTx = new WalletTransaction
-                {
-                    Amount = calculatedFee,
-                    Type = TransactionType.ParkingFee,
-                    Status = TransactionStatus.Completed,
-                    CreatedAt = now,
-                    WalletId = wallet.Id,
-                    OrderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
-                };
-                _context.WalletTransactions.Add(walletTx);
-
-                // Close session
-                session.ExitTime = now;
-                session.CalculatedFee = calculatedFee;
-                session.Status = SessionStatus.Completed;
-
-                // Free a slot
-                var slot = await _context.ParkingSlots
-                    .FirstOrDefaultAsync(s => s.IsOccupied);
-
-                if (slot != null)
-                    slot.IsOccupied = false;
+                }
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
+                isCommitted = true;
 
-                _cache.Remove(MapCacheKey);
+                var gateOpened = false;
+                string? gateError = null;
+
+                try
+                {
+                    await _gateControlService.OpenGateAsync();
+                    gateOpened = true;
+                }
+                catch (Exception mqttEx)
+                {
+                    gateError = mqttEx.Message;
+                }
 
                 return Ok(new
                 {
                     message = "Exit successful.",
                     licensePlate = session.LicensePlate,
-                    fee = calculatedFee,
-                    durationHours = Math.Round((decimal)totalHours, 2),
-                    newBalance = wallet.Balance,
-                    slotFreed = slot?.SlotId
+                    fee = exitResult.CalculatedFee,
+                    durationHours = Math.Round((decimal)exitResult.TotalHours, 2),
+                    newBalance = exitResult.NewBalance,
+                    gateOpened,
+                    gateError
                 });
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
+                if (!isCommitted)
+                {
+                    await transaction.RollbackAsync();
+                }
+
                 return StatusCode(500, new { message = "Exit failed.", error = ex.Message });
             }
+        }
+
+        private async Task<SessionExitResult> ProcessSessionExitAsync(ParkingSession session, string userId, DateTime now)
+        {
+            var totalHours = (now - session.EntryTime).TotalHours;
+            var calculatedFee = CalculateDynamicFee(session.EntryTime);
+
+            var wallet = await _context.Wallets
+                .FirstOrDefaultAsync(w => w.UserId == userId);
+
+            if (wallet == null || wallet.Balance < calculatedFee)
+            {
+                return SessionExitResult.Failed(
+                    $"Insufficient balance. The parking fee is {calculatedFee} credits, but your balance is only {wallet?.Balance ?? 0}.");
+            }
+
+            wallet.Balance -= calculatedFee;
+
+            var walletTx = new WalletTransaction
+            {
+                Amount = calculatedFee,
+                Type = TransactionType.ParkingFee,
+                Status = TransactionStatus.Completed,
+                CreatedAt = now,
+                WalletId = wallet.Id,
+                OrderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+            };
+            _context.WalletTransactions.Add(walletTx);
+
+            session.ExitTime = now;
+            session.CalculatedFee = calculatedFee;
+            session.Status = SessionStatus.Completed;
+
+            return SessionExitResult.Succeeded(calculatedFee, totalHours, wallet.Balance);
+        }
+
+        private decimal CalculateDynamicFee(DateTime entryTime)
+        {
+            var totalHours = (DateTime.UtcNow - entryTime).TotalHours;
+
+            decimal fee = 10_000;
+
+            if (totalHours > 24)
+            {
+                var overtimeHours = (int)Math.Ceiling(totalHours - 24);
+                fee += overtimeHours * 1_000;
+            }
+
+            return fee;
+        }
+
+        private sealed class SessionExitResult
+        {
+            public bool Success { get; private init; }
+            public string? ErrorMessage { get; private init; }
+            public decimal CalculatedFee { get; private init; }
+            public double TotalHours { get; private init; }
+            public decimal NewBalance { get; private init; }
+
+            public static SessionExitResult Failed(string errorMessage) => new()
+            {
+                Success = false,
+                ErrorMessage = errorMessage
+            };
+
+            public static SessionExitResult Succeeded(decimal calculatedFee, double totalHours, decimal newBalance) => new()
+            {
+                Success = true,
+                CalculatedFee = calculatedFee,
+                TotalHours = totalHours,
+                NewBalance = newBalance
+            };
         }
     }
 }

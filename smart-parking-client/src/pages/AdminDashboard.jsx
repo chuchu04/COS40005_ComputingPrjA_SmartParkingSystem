@@ -97,9 +97,7 @@ export default function ProfilePage({ onLogout }) {
 
         {/* ─── Card 1: Digital Wallet ─── */}
         <div style={styles.card}>
-          <div style={styles.cardTitle}>
-            <span style={styles.cardIcon}>💳</span> Digital Wallet
-          </div>
+          <div style={styles.cardTitle}>Digital Wallet</div>
           <div style={styles.walletCard}>
             <div style={styles.walletLabel}>Available Balance</div>
             <div style={styles.walletAmount}>{formatVND(walletBalance)}</div>
@@ -108,9 +106,7 @@ export default function ProfilePage({ onLogout }) {
 
         {/* ─── Card 2: Current Parking Session ─── */}
         <div style={styles.card}>
-          <div style={styles.cardTitle}>
-            <span style={styles.cardIcon}>🚗</span> Current Parking Session
-          </div>
+          <div style={styles.cardTitle}>Current Parking Session</div>
 
           {activeSession === null ? (
             <div style={styles.emptySession}>
@@ -170,43 +166,37 @@ export default function ProfilePage({ onLogout }) {
 const styles = {
   page: {
     minHeight: 'calc(100vh - 56px)',
-    background: '#f0f2f5',
-    padding: '32px 16px',
+    background: '#f3f4f6',
+    padding: '24px 16px',
     display: 'flex',
     justifyContent: 'center',
     fontFamily: 'Inter, system-ui, sans-serif',
   },
   container: {
     width: '100%',
-    maxWidth: '520px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
+    maxWidth: '720px',
+    display: 'grid',
+    gap: '16px',
   },
   card: {
     background: '#ffffff',
-    borderRadius: '16px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06)',
-    padding: '28px 28px',
+    borderRadius: '14px',
+    border: '1px solid #e5e7eb',
+    padding: '20px',
+    boxShadow: '0 1px 2px rgba(15, 23, 42, 0.06)',
   },
   cardTitle: {
-    fontSize: '16px',
+    fontSize: '18px',
     fontWeight: 700,
     color: '#111827',
-    marginBottom: '16px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  cardIcon: {
-    fontSize: '20px',
+    marginBottom: '14px',
   },
   /* ── Profile Header ── */
   header: {
     display: 'flex',
     alignItems: 'center',
     gap: '16px',
-    marginBottom: '20px',
+    marginBottom: '16px',
   },
   avatar: {
     width: '56px',
@@ -222,20 +212,20 @@ const styles = {
     flexShrink: 0,
   },
   name: {
-    fontSize: '20px',
+    fontSize: '26px',
     fontWeight: 700,
     color: '#111827',
-    margin: '0 0 2px',
+    margin: '0 0 4px',
   },
   email: {
-    fontSize: '14px',
+    fontSize: '13px',
     color: '#6b7280',
     margin: 0,
   },
   /* ── Wallet ── */
   walletCard: {
-    background: '#f0fdf4',
-    border: '1px solid #bbf7d0',
+    background: '#f8fafc',
+    border: '1px solid #e2e8f0',
     borderRadius: '12px',
     padding: '24px',
     textAlign: 'center',
@@ -243,7 +233,7 @@ const styles = {
   walletLabel: {
     fontSize: '12px',
     fontWeight: 600,
-    color: '#16a34a',
+    color: '#475569',
     textTransform: 'uppercase',
     letterSpacing: '0.8px',
     marginBottom: '6px',
@@ -251,7 +241,7 @@ const styles = {
   walletAmount: {
     fontSize: '32px',
     fontWeight: 700,
-    color: '#15803d',
+    color: '#0f766e',
   },
   /* ── Empty Session ── */
   emptySession: {
@@ -348,8 +338,8 @@ const styles = {
     width: '100%',
     padding: '10px',
     borderRadius: '8px',
-    border: '1px solid #e5e7eb',
-    background: '#ffffff',
+    border: '1px solid #fecaca',
+    background: '#fef2f2',
     color: '#dc2626',
     fontSize: '14px',
     fontWeight: 600,

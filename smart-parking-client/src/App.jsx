@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import LiveMap from './pages/LiveMap';
 import WalletDashboard from './pages/WalletDashboard';
@@ -61,7 +61,7 @@ function NavBar({ user, onLogout }) {
 }
 
 function ProtectedRoute({ user, children }) {
-  if (!user) {
+  if (!user || !authService.isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
   return children;
@@ -120,6 +120,17 @@ const navStyles = {
 
 export default function App() {
   const [user, setUser] = useState(authService.getCurrentUser());
+
+  useEffect(() => {
+    const onUnauthorized = () => {
+      setUser(null);
+    };
+
+    window.addEventListener('auth:unauthorized', onUnauthorized);
+    return () => {
+      window.removeEventListener('auth:unauthorized', onUnauthorized);
+    };
+  }, []);
 
   const handleLogin = (data) => setUser(data);
   const handleLogout = () => {
